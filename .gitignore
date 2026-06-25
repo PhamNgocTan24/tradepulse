@@ -156,7 +156,6 @@ scripts/*.tmp
 .gemini/
 .kiro/
 .claude/
-CLAUDE.md
 
 # ─── Misc ───────────────────────────────────────────────────
 *.pid
