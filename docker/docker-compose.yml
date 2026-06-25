@@ -1,0 +1,226 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# TradePulse — Local Infrastructure Bootstrap
+# Usage: cd docker && docker-compose up -d
+#
+# Starts: PostgreSQL, MongoDB, Redis, Zookeeper, Kafka, Kafka-UI
+# Does NOT start application services — run them via Maven:
+#   mvn spring-boot:run -pl services/auth-service
+# ─────────────────────────────────────────────────────────────────────────────
+
+networks:
+  tradepulse-net:
+    driver: bridge
+
+volumes:
+  postgres-data:
+  mongodb-data:
+  redis-data:
+  zookeeper-data:
+  kafka-data:
+
+services:
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # PostgreSQL 15
+  # Creates all service databases via init script on first boot.
+  # ───────────────────────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:15-alpine
+    container_name: tradepulse-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: tradepulse
+      POSTGRES_PASSWORD: tradepulse
+      POSTGRES_DB: tradepulse_auth   # default DB; others created by init script
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./init/postgres-init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tradepulse -d tradepulse_auth"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tradepulse-net
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # MongoDB 7
+  # All services share one instance; each uses its own database.
+  # ───────────────────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: tradepulse-mongodb
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: tradepulse
+      MONGO_INITDB_ROOT_PASSWORD: tradepulse
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tradepulse-net
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Redis 7
+  # Used for: JWT blacklist, rate limiting, price cache, leaderboard, WS sessions
+  # ───────────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: tradepulse-redis
+    restart: unless-stopped
+    command: >
+      redis-server
+      --requirepass tradepulse
+      --save 60 1
+      --loglevel warning
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "tradepulse", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - tradepulse-net
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Zookeeper (required by Kafka 3.6 — KRaft mode optional in future)
+  # ───────────────────────────────────────────────────────────────────────────
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    container_name: tradepulse-zookeeper
+    restart: unless-stopped
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_SYNC_LIMIT: 2
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper-data:/var/lib/zookeeper/data
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 2181 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - tradepulse-net
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Kafka 3.6 (Confluent Platform image for cp-kafka)
+  # Topics are created automatically by services on startup (auto.create.topics=true)
+  # For explicit topic creation, see init/kafka-init.sh
+  # ───────────────────────────────────────────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: tradepulse-kafka
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT_INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_NUM_PARTITIONS: 5
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
+      KAFKA_LOG_RETENTION_HOURS: 168   # 7 days
+      KAFKA_LOG4J_LOGGERS: "kafka=WARN,kafka.controller=WARN,kafka.log=WARN,kafka.server=WARN"
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL",
+             "kafka-broker-api-versions --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+    networks:
+      - tradepulse-net
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Kafka Topic Initialiser (one-shot container)
+  # Creates all required topics with correct partition counts per CLAUDE.md
+  # ───────────────────────────────────────────────────────────────────────────
+  kafka-init:
+    image: confluentinc/cp-kafka:7.6.1
+    container_name: tradepulse-kafka-init
+    depends_on:
+      kafka:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "-c"]
+    command: |
+      "
+      echo 'Waiting for Kafka to be ready...'
+      sleep 5
+
+      echo 'Creating topics...'
+
+      # market-data: 10 partitions (partitioned by symbol)
+      kafka-topics --bootstrap-server kafka:29092 \
+        --create --if-not-exists --topic market-data \
+        --partitions 10 --replication-factor 1
+
+      # order-events: 5 partitions (partitioned by order_id)
+      kafka-topics --bootstrap-server kafka:29092 \
+        --create --if-not-exists --topic order-events \
+        --partitions 5 --replication-factor 1
+
+      # portfolio-events: 5 partitions (partitioned by user_id)
+      kafka-topics --bootstrap-server kafka:29092 \
+        --create --if-not-exists --topic portfolio-events \
+        --partitions 5 --replication-factor 1
+
+      # notifications: 3 partitions (partitioned by user_id)
+      kafka-topics --bootstrap-server kafka:29092 \
+        --create --if-not-exists --topic notifications \
+        --partitions 3 --replication-factor 1
+
+      # user-events: 3 partitions
+      kafka-topics --bootstrap-server kafka:29092 \
+        --create --if-not-exists --topic user-events \
+        --partitions 3 --replication-factor 1
+
+      echo 'Topics created successfully:'
+      kafka-topics --bootstrap-server kafka:29092 --list
+      "
+    networks:
+      - tradepulse-net
+    restart: "no"
+
+  # ───────────────────────────────────────────────────────────────────────────
+  # Kafka UI — local dev only (http://localhost:8989)
+  # ───────────────────────────────────────────────────────────────────────────
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: tradepulse-kafka-ui
+    restart: unless-stopped
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "8989:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - tradepulse-net

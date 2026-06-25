@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.tradepulse</groupId>
+        <artifactId>tradepulse</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>matching-engine</artifactId>
+    <name>TradePulse :: Matching Engine</name>
+    <description>
+        Pure Kafka worker — the DSA core of TradePulse.
+        Maintains an in-memory OrderBook (PriorityQueue max-heap/min-heap) per symbol.
+        Consumes NEW_ORDER from 'order-events', runs O(log n) price-time priority matching,
+        publishes ORDER_FILLED / PARTIAL_FILL to 'order-events' and 'portfolio-events'.
+        Also consumes 'market-data' to trigger limit order evaluation on price updates.
+        Additional DSA: sliding-window VWAP, segment tree for range price queries.
+
+        No business HTTP endpoints — web layer exists solely for K8s health probes
+        (/actuator/health/liveness, /actuator/health/readiness).
+    </description>
+
+    <dependencies>
+        <!--
+            Minimal web layer: only needed so Spring Boot Actuator can expose
+            /actuator/health over HTTP for Kubernetes liveness/readiness probes.
+            No @RestController business logic here.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- ===== Messaging ===== -->
+        <!--
+            Consumer groups:
+              - 'order-events'  consumer group: matching-engine-orders
+              - 'market-data'   consumer group: matching-engine-market
+            Producer:
+              - 'order-events'  (ORDER_FILLED, PARTIAL_FILL)
+              - 'portfolio-events'
+        -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+
+        <!-- ===== Observability ===== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+        <!-- ===== Internal Modules ===== -->
+        <!-- Only needs DTOs — no JWT/security (internal service, not client-facing) -->
+        <dependency>
+            <groupId>com.tradepulse</groupId>
+            <artifactId>common-dto</artifactId>
+        </dependency>
+
+        <!-- ===== Testing ===== -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

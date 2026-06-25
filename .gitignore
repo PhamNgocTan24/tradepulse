@@ -1,0 +1,166 @@
+# ============================================================
+# TradePulse – .gitignore
+# Stack: Java 21, Spring Boot 3, Maven, Docker, Kafka, PostgreSQL
+# ============================================================
+
+# ─── Maven ──────────────────────────────────────────────────
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+.mvn/wrapper/maven-wrapper.properties
+
+# Maven wrapper binary (keep the script, ignore downloaded binary)
+.mvn/wrapper/MavenWrapperDownloader.java
+
+# ─── Spring Boot ────────────────────────────────────────────
+# Local config with secrets (never commit)
+**/src/main/resources/application-local.yml
+**/src/main/resources/application-local.properties
+**/src/main/resources/application-secret*.yml
+**/src/main/resources/application-secret*.properties
+
+# Spring Boot devtools restart trigger
+.spring-devtools.properties
+
+# ─── Java ───────────────────────────────────────────────────
+*.class
+*.ctxt
+.mtj.tmp/
+*.jar
+*.war
+*.nar
+*.ear
+hs_err_pid*
+replay_pid*
+
+# ─── Secrets & Environment ──────────────────────────────────
+.env
+.env.*
+*.env
+!.env.example
+!.env.template
+secrets/
+**/secrets/**
+*.pem
+*.key
+*.p12
+*.jks
+*.pfx
+aws-credentials
+.aws/credentials
+
+# ─── Docker ─────────────────────────────────────────────────
+# Local docker-compose overrides (contain local secrets/ports)
+docker/docker-compose.override.yml
+docker/docker-compose.local.yml
+docker/.env
+docker/**/.env
+
+# Docker volumes / mounted data
+docker/data/
+docker/volumes/
+
+# ─── IntelliJ IDEA ──────────────────────────────────────────
+.idea/
+!.idea/codeStyles/
+!.idea/copyright/
+!.idea/inspectionProfiles/
+*.iws
+*.iml
+*.ipr
+out/
+
+# ─── VS Code ────────────────────────────────────────────────
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# ─── macOS ──────────────────────────────────────────────────
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+
+# ─── Linux ──────────────────────────────────────────────────
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ─── Windows ────────────────────────────────────────────────
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# ─── Logs ───────────────────────────────────────────────────
+logs/
+*.log
+*.log.*
+log/
+
+# ─── Test & Coverage ────────────────────────────────────────
+**/target/surefire-reports/
+**/target/failsafe-reports/
+**/target/jacoco.exec
+**/target/site/jacoco/
+.testcontainers.properties
+
+# ─── Build & Temp ───────────────────────────────────────────
+build/
+dist/
+*.tmp
+*.bak
+*.swp
+*.swo
+
+# ─── Node (docs tooling / Swagger UI, etc.) ─────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Terraform ──────────────────────────────────────────────
+infrastructure/terraform/**/.terraform/
+infrastructure/terraform/**/*.tfstate
+infrastructure/terraform/**/*.tfstate.backup
+infrastructure/terraform/**/.terraform.lock.hcl
+infrastructure/terraform/**/terraform.tfvars
+infrastructure/terraform/**/override.tf
+infrastructure/terraform/**/override.tf.json
+
+# ─── Kubernetes local patches ───────────────────────────────
+infrastructure/k8s/**/*-local.yaml
+infrastructure/k8s/**/*-secret*.yaml
+
+# ─── Scripts (generated / temp) ─────────────────────────────
+scripts/generated/
+scripts/*.tmp
+
+# ─── AI / Agentic IDE files ─────────────────────────────────
+.gemini/
+.kiro/
+.claude/
+CLAUDE.md
+
+# ─── Misc ───────────────────────────────────────────────────
+*.pid
+*.seed
+*.pid.lock
+.cache/
+.gradle/

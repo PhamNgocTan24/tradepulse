@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- ===== Spring Boot Parent ===== -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.2.5</version>
+        <relativePath/>
+    </parent>
+
+    <!-- ===== Root Coordinates ===== -->
+    <groupId>com.tradepulse</groupId>
+    <artifactId>tradepulse</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>TradePulse :: Parent</name>
+    <description>Real-time Stock/Crypto Trading Simulator — Portfolio Project</description>
+
+    <!-- ===== All Modules ===== -->
+    <modules>
+        <!-- Shared libraries (no Spring Boot main class) -->
+        <module>shared/common-dto</module>
+        <module>shared/common-util</module>
+        <module>shared/common-security</module>
+
+        <!-- Microservices -->
+        <module>services/api-gateway-service</module>
+        <module>services/auth-service</module>
+        <module>services/user-service</module>
+        <module>services/market-data-service</module>
+        <module>services/order-service</module>
+        <module>services/matching-engine</module>
+        <module>services/portfolio-service</module>
+        <module>services/notification-service</module>
+        <module>services/reporting-service</module>
+    </modules>
+
+    <!-- ===== Global Properties ===== -->
+    <properties>
+        <java.version>21</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!-- Framework Versions -->
+        <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <spring-cloud-aws.version>3.1.1</spring-cloud-aws.version>
+
+        <!-- AWS SDK v2 -->
+        <aws-sdk.version>2.25.67</aws-sdk.version>
+
+        <!-- Security -->
+        <jjwt.version>0.12.5</jjwt.version>
+        <java-otp.version>0.4.0</java-otp.version>
+        <zxing.version>3.5.3</zxing.version>
+
+        <!-- Utilities -->
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+
+        <!-- Lombok version (required for annotation processing) -->
+        <lombok.version>1.18.44</lombok.version>
+
+        <!-- PDF Generation -->
+        <itext7.version>7.2.5</itext7.version>
+
+        <!-- Plugin Versions -->
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+    </properties>
+
+    <!-- ===== Dependency Version Management (BOMs) ===== -->
+    <dependencyManagement>
+        <dependencies>
+
+            <!-- Spring Cloud BOM -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- Spring Cloud AWS BOM (S3, SES, SQS, Secrets Manager) -->
+            <dependency>
+                <groupId>io.awspring.cloud</groupId>
+                <artifactId>spring-cloud-aws-dependencies</artifactId>
+                <version>${spring-cloud-aws.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- AWS SDK v2 BOM -->
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${aws-sdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+
+            <!-- ===== JWT (jjwt 0.12.x) ===== -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <!-- ===== TOTP (2FA) ===== -->
+            <dependency>
+                <groupId>com.eatthepath</groupId>
+                <artifactId>java-otp</artifactId>
+                <version>${java-otp.version}</version>
+            </dependency>
+
+            <!-- ===== QR Code (ZXing) ===== -->
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>${zxing.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>javase</artifactId>
+                <version>${zxing.version}</version>
+            </dependency>
+
+            <!-- ===== MapStruct ===== -->
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+
+            <!-- ===== iText7 PDF ===== -->
+            <dependency>
+                <groupId>com.itextpdf</groupId>
+                <artifactId>itext7-core</artifactId>
+                <version>${itext7.version}</version>
+                <type>pom</type>
+            </dependency>
+            <dependency>
+                <groupId>com.itextpdf</groupId>
+                <artifactId>kernel</artifactId>
+                <version>${itext7.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.itextpdf</groupId>
+                <artifactId>layout</artifactId>
+                <version>${itext7.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.itextpdf</groupId>
+                <artifactId>io</artifactId>
+                <version>${itext7.version}</version>
+            </dependency>
+
+            <!-- ===== Internal Modules ===== -->
+            <dependency>
+                <groupId>com.tradepulse</groupId>
+                <artifactId>common-dto</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.tradepulse</groupId>
+                <artifactId>common-security</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <!-- ===== Dependencies inherited by ALL modules ===== -->
+    <dependencies>
+        <!-- Lombok — compile-time only -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- OAuth2 Resource Server starter: provides org.springframework.security.oauth2.jwt.Jwt -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!-- Testing baseline -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <!-- ===== Build Plugin Management ===== -->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Compiler: Java 21 + enable annotation processing (Lombok + MapStruct) -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <release>${java.version}</release>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.mapstruct</groupId>
+                                <artifactId>mapstruct-processor</artifactId>
+                                <version>${mapstruct.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                        <compilerArgs>
+                            <arg>-parameters</arg>
+                        </compilerArgs>
+                    </configuration>
+                </plugin>
+
+                <!-- Surefire: JUnit 5 -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>${maven-surefire-plugin.version}</version>
+                </plugin>
+
+                <!-- Spring Boot plugin — only activated in service modules that declare it -->
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <configuration>
+                        <excludes>
+                            <exclude>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                            </exclude>
+                        </excludes>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

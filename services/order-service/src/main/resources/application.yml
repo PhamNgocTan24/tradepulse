@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: order-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tradepulse_orders
+    username: ${DB_USERNAME:tradepulse}
+    password: ${DB_PASSWORD:tradepulse}
+    hikari:
+      maximum-pool-size: 15
+      minimum-idle: 3
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://tradepulse:tradepulse@localhost:27017/tradepulse_orders?authSource=admin}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+      properties:
+        enable.idempotence: true
+    consumer:
+      group-id: order-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      auto-offset-reset: earliest
+      properties:
+        spring.json.trusted.packages: "com.tradepulse.*"
+        spring.json.type.mapping: >
+          orderEvent:com.tradepulse.common.dto.kafka.order.OrderEvent
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_SERVICE_JWKS_URI:http://localhost:8081/api/auth/.well-known/jwks.json}
+
+server:
+  port: 8083
+  servlet:
+    context-path: /api/orders
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+logging:
+  level:
+    com.tradepulse: DEBUG

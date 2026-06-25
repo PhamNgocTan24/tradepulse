@@ -1,0 +1,51 @@
+spring:
+  application:
+    name: market-data-service
+
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://tradepulse:tradepulse@localhost:27017/tradepulse_market?authSource=admin}
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:tradepulse}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+      retries: 3
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_SERVICE_JWKS_URI:http://localhost:8081/api/auth/.well-known/jwks.json}
+
+server:
+  port: 8084
+  servlet:
+    context-path: /api/market
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+binance:
+  websocket:
+    uri: ${BINANCE_WS_URI:wss://stream.binance.com:9443/stream}
+    streams: ${BINANCE_STREAMS:btcusdt@ticker,ethusdt@ticker,solusdt@ticker}
+    reconnect:
+      initial-delay-ms: 1000
+      max-delay-ms: 30000
+
+redis:
+  price-ttl-seconds: 30
+
+logging:
+  level:
+    com.tradepulse: DEBUG

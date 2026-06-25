@@ -1,0 +1,106 @@
+spring:
+  application:
+    name: api-gateway-service
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:tradepulse}
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Gateway fetches the JWKS from auth-service to validate RS256 tokens
+          jwk-set-uri: ${AUTH_SERVICE_JWKS_URI:http://localhost:8081/api/auth/.well-known/jwks.json}
+
+  cloud:
+    gateway:
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "${CORS_ALLOWED_ORIGINS:http://localhost:3000}"
+            allowedMethods: "GET,POST,PUT,DELETE,OPTIONS"
+            allowedHeaders: "*"
+            allowCredentials: true
+      routes:
+        - id: auth-service
+          uri: ${AUTH_SERVICE_URL:http://localhost:8081}
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=0
+
+        - id: user-service
+          uri: ${USER_SERVICE_URL:http://localhost:8082}
+          predicates:
+            - Path=/api/users/**
+          filters:
+            - StripPrefix=0
+
+        - id: order-service
+          uri: ${ORDER_SERVICE_URL:http://localhost:8083}
+          predicates:
+            - Path=/api/orders/**
+          filters:
+            - StripPrefix=0
+
+        - id: market-data-service
+          uri: ${MARKET_DATA_SERVICE_URL:http://localhost:8084}
+          predicates:
+            - Path=/api/market/**
+          filters:
+            - StripPrefix=0
+
+        - id: portfolio-service
+          uri: ${PORTFOLIO_SERVICE_URL:http://localhost:8085}
+          predicates:
+            - Path=/api/portfolio/**
+          filters:
+            - StripPrefix=0
+
+        - id: notification-service
+          uri: ${NOTIFICATION_SERVICE_URL:http://localhost:8086}
+          predicates:
+            - Path=/api/alerts/**,/ws/**
+          filters:
+            - StripPrefix=0
+
+        - id: reporting-service
+          uri: ${REPORTING_SERVICE_URL:http://localhost:8087}
+          predicates:
+            - Path=/api/reports/**
+          filters:
+            - StripPrefix=0
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+
+rate-limit:
+  requests-per-minute: ${RATE_LIMIT_RPM:60}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 5
+
+logging:
+  level:
+    com.tradepulse: DEBUG
+    org.springframework.cloud.gateway: INFO

@@ -1,0 +1,61 @@
+spring:
+  application:
+    name: reporting-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tradepulse_reporting
+    username: ${DB_USERNAME:tradepulse}
+    password: ${DB_PASSWORD:tradepulse}
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${AUTH_SERVICE_JWKS_URI:http://localhost:8081/api/auth/.well-known/jwks.json}
+
+spring.cloud.aws:
+  region:
+    static: ${AWS_REGION:us-east-1}
+  credentials:
+    instance-profile: true
+  s3:
+    bucket: ${S3_REPORTS_BUCKET:tradepulse-reports}
+
+server:
+  port: 8087
+  servlet:
+    context-path: /api/reports
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+report:
+  presigned-url-expiry-minutes: 15
+
+# Internal service URLs (for fetching portfolio/transaction data to build reports)
+portfolio-service:
+  url: ${PORTFOLIO_SERVICE_URL:http://localhost:8085}
+
+logging:
+  level:
+    com.tradepulse: DEBUG

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.tradepulse</groupId>
+        <artifactId>tradepulse</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>api-gateway-service</artifactId>
+    <name>TradePulse :: API Gateway</name>
+    <description>
+        Spring Cloud Gateway (WebFlux/Reactive) — single entry point for all clients.
+        Responsibilities: JWT validation filter, Redis token-bucket rate limiting,
+        request routing to downstream services, CORS, Resilience4j circuit breaker.
+
+        IMPORTANT: This module is fully REACTIVE (WebFlux).
+        Do NOT add spring-boot-starter-web — it conflicts with Gateway's Netty runtime.
+    </description>
+
+    <dependencies>
+        <!-- ===== Core: Spring Cloud Gateway (reactive, runs on Netty) ===== -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-gateway</artifactId>
+        </dependency>
+
+        <!--
+            Reactive Redis — for token-bucket rate limiter (RequestRateLimiter filter).
+            Must use -reactive variant; the standard redis starter is servlet-only.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis-reactive</artifactId>
+        </dependency>
+
+        <!-- Circuit breaker for reactive stack (Resilience4j + Reactor) -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
+        </dependency>
+
+        <!--
+            OAuth2 Resource Server (reactive) — validates JWT (RS256) on incoming requests.
+            Provides ReactiveJwtDecoder; public key loaded from auth-service JWKS endpoint.
+        -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+
+        <!-- Actuator: /actuator/health for K8s liveness/readiness probes -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Prometheus metrics (Micrometer → CloudWatch / Grafana) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
+        <!-- Internal: JWT claim extraction utilities -->
+        <dependency>
+            <groupId>com.tradepulse</groupId>
+            <artifactId>common-security</artifactId>
+        </dependency>
+
+        <!-- ===== Testing ===== -->
+        <!-- WebTestClient for reactive endpoint tests -->
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
