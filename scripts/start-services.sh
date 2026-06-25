@@ -59,7 +59,7 @@ mkdir -p "$LOG_DIR" "$PID_DIR"
 resolve_services() {
   local requested=("$@")
   if [[ ${#requested[@]} -eq 0 ]]; then
-    echo "${SERVICES[@]}"
+    printf "%s\n" "${SERVICES[@]}"
     return
   fi
 
@@ -74,7 +74,9 @@ resolve_services() {
       fi
     done
   done
-  echo "${result[@]:-}"
+  if [[ ${#result[@]} -gt 0 ]]; then
+    printf "%s\n" "${result[@]}"
+  fi
 }
 
 # --------------- Start a single service ---------------------------------------
@@ -260,7 +262,7 @@ main() {
     stop)
       log_section "Stopping TradePulse Services"
       local to_stop
-      mapfile -t to_stop < <(resolve_services "${args[@]}" | tr ' ' '\n')
+      mapfile -t to_stop < <(resolve_services "${args[@]}")
       for svc in "${to_stop[@]}"; do
         [[ -n "$svc" ]] && stop_service "$svc"
       done
@@ -272,7 +274,7 @@ main() {
       check_prereqs
 
       local to_start
-      mapfile -t to_start < <(resolve_services "${args[@]}" | tr ' ' '\n')
+      mapfile -t to_start < <(resolve_services "${args[@]}")
 
       if [[ ${#to_start[@]} -eq 0 || -z "${to_start[0]}" ]]; then
         log_error "No matching services found for: ${args[*]:-}"
