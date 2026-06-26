@@ -14,10 +14,6 @@ tradepulse/
 ├── CLAUDE.md                  # AI agent context — commands, rules, references
 ├── AGENTS.md                  # AI agent context (identical to CLAUDE.md)
 ├── README.md                  # Quick start
-├── API_CONTRACTS.md           # Root copy (source of docs/api/ApiContracts.md)
-├── DESIGN_PATTERNS.md         # Root copy (source of docs/development/Patterns.md)
-├── FOLDER_STRUCTURE.md        # Root copy (source of docs/development/FolderStructure.md)
-├── SYNTAX.md                  # Root copy (source of docs/development/Syntax.md)
 ├── pom.xml                    # Maven multi-module root
 ├── services/                  # Deployable microservices
 ├── shared/                    # Shared libraries (cross-service)
