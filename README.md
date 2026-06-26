@@ -5,10 +5,10 @@ TradePulse is a scaffold-phase crypto trading platform built around real-time Bi
 ## Documentation
 
 - [CLAUDE.md](CLAUDE.md) - compact project memory and working context
-- [SYNTAX.md](SYNTAX.md) - concrete implementation rules and code examples
-- [DESIGN_PATTERNS.md](DESIGN_PATTERNS.md) - service and distributed-systems patterns
-- [API_CONTRACTS.md](API_CONTRACTS.md) - public API contracts and error model
-- [FOLDER_STRUCTURE.md](FOLDER_STRUCTURE.md) - package and folder conventions
+- [Syntax Guide](docs/development/Syntax.md) - concrete implementation rules and code examples
+- [Design Patterns](docs/development/Patterns.md) - service and distributed-systems patterns
+- [API Contracts](docs/api/ApiContracts.md) - public API contracts and error model
+- [Folder Structure](docs/development/FolderStructure.md) - package and folder conventions
 - [.kiro/specs/tradepulse.md](.kiro/specs/tradepulse.md) - longer architecture specification
 
 ## Quick Start
