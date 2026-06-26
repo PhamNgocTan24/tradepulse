@@ -70,6 +70,9 @@
         <!-- Plugin Versions -->
         <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+
+        <!-- Swagger / OpenAPI -->
+        <springdoc.version>2.5.0</springdoc.version>
     </properties>
 
     <!-- ===== Dependency Version Management (BOMs) ===== -->
@@ -174,6 +177,18 @@
                 <groupId>com.itextpdf</groupId>
                 <artifactId>io</artifactId>
                 <version>${itext7.version}</version>
+            </dependency>
+
+            <!-- ===== Swagger / OpenAPI ===== -->
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+                <version>${springdoc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springdoc</groupId>
+                <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+                <version>${springdoc.version}</version>
             </dependency>
 
             <!-- ===== Internal Modules ===== -->

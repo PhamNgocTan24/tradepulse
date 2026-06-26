@@ -24,7 +24,12 @@ public class SecurityConfig {
                                 "/api/auth/.well-known/jwks.json",
                                 "/api/auth/oauth2/**",
                                 "/api/users/leaderboard",
-                                SecurityConstants.ACTUATOR_PATH
+                                SecurityConstants.ACTUATOR_PATH,
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/webjars/**",
+                                "/v3/api-docs/**",
+                                "/api/*/v3/api-docs"
                         ).permitAll()
                         // WebSocket upgrade paths
                         .pathMatchers("/ws/**").permitAll()
