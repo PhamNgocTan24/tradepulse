@@ -49,6 +49,13 @@ public class Transaction {
     @Column(name = "total_value", nullable = false, precision = 18, scale = 8)
     private BigDecimal totalValue;
 
+    /**
+     * Realized P&L for SELL fills only. NULL for BUY fills.
+     * Formula: totalValue - (avgCostBasis × quantity)
+     */
+    @Column(name = "realized_pnl", precision = 18, scale = 8)
+    private BigDecimal realizedPnl;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;

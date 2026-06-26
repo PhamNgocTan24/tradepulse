@@ -26,6 +26,10 @@ public class Holding {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
+    /** Optimistic locking — prevents concurrent fill events from overwriting each other. */
+    @Version
+    private long version;
+
     @Column(name = "user_id", nullable = false)
     private UUID userId;
 
