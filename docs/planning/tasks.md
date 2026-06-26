@@ -15,6 +15,8 @@ This document tracks active development tasks, running services, and fixes appli
 - [x] Implement memory-based OrderBook matching in `matching-engine`
 - [x] Consume trade events in `portfolio-service` and update holdings
 - [x] Implement real-time portfolio value updates using Redis prices
+- [x] FR-07: Expose clean portfolio REST API (DTO hygiene, TransactionResponse, P&L summary)
+- [x] FR-09: Fix leaderboard N+1 query in `user-service` (batch display names)
 
 ---
 

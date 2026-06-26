@@ -29,6 +29,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+
+import com.tradepulse.portfolio.dto.response.TransactionResponse;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.*;
@@ -258,5 +264,65 @@ class PortfolioServiceImplTest {
 
         verify(valueOps).set(eq("portfolio_value:" + userId), anyString(), any());
         verify(zSetOps).add(eq("leaderboard"), eq(userId.toString()), anyDouble());
+    }
+
+    // ─── READ PATH TESTS ──────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("getPortfolio: includes totalRealizedPnl from TransactionRepository aggregate query")
+    void getPortfolio_includesRealizedPnl() {
+        // GIVEN
+        PortfolioAccount account = PortfolioAccount.builder()
+                .userId(userId)
+                .cashBalance(new BigDecimal("75000.00000000"))
+                .build();
+        BigDecimal expectedRealizedPnl = new BigDecimal("5000.00000000");
+
+        given(accountRepository.findById(userId)).willReturn(Optional.of(account));
+        given(holdingRepository.findByUserId(userId)).willReturn(List.of()); // no open positions
+        given(transactionRepository.sumRealizedPnlByUserId(userId)).willReturn(expectedRealizedPnl);
+        given(valueOps.get(anyString())).willReturn(null);
+
+        // WHEN
+        var response = portfolioService.getPortfolio(userId);
+
+        // THEN — realized P&L populated from aggregate query
+        assertThat(response.totalRealizedPnl())
+                .isEqualByComparingTo(expectedRealizedPnl);
+        assertThat(response.cashBalance())
+                .isEqualByComparingTo(new BigDecimal("75000.00000000"));
+        assertThat(response.holdingsValue())
+                .isEqualByComparingTo(BigDecimal.ZERO);
+        verify(transactionRepository).sumRealizedPnlByUserId(userId);
+    }
+
+    @Test
+    @DisplayName("getHistory: maps Transaction entities to TransactionResponse DTOs — no JPA entity exposed")
+    void getHistory_mapsEntitiesToDtos() {
+        // GIVEN — a transaction in the DB
+        Transaction tx = Transaction.builder()
+                .userId(userId)
+                .orderId(orderId)
+                .symbol("BTCUSDT")
+                .side("SELL")
+                .quantity(new BigDecimal("0.50000000"))
+                .price(new BigDecimal("70000.00000000"))
+                .totalValue(new BigDecimal("35000.00000000"))
+                .realizedPnl(new BigDecimal("5000.00000000"))
+                .build();
+        Page<Transaction> page = new PageImpl<>(List.of(tx));
+        given(transactionRepository.findByUserIdOrderByCreatedAtDesc(
+                eq(userId), any(PageRequest.class))).willReturn(page);
+
+        // WHEN
+        var result = portfolioService.getHistory(userId, 0, 20);
+
+        // THEN — result contains TransactionResponse (not Transaction entity)
+        assertThat(result.content()).hasSize(1);
+        TransactionResponse dto = result.content().get(0);
+        assertThat(dto.symbol()).isEqualTo("BTCUSDT");
+        assertThat(dto.side()).isEqualTo("SELL");
+        assertThat(dto.realizedPnl()).isEqualByComparingTo(new BigDecimal("5000.00000000"));
+        assertThat(dto.totalValue()).isEqualByComparingTo(new BigDecimal("35000.00000000"));
     }
 }

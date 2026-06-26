@@ -7,6 +7,7 @@ import com.tradepulse.portfolio.domain.entity.PortfolioAccount;
 import com.tradepulse.portfolio.domain.entity.Transaction;
 import com.tradepulse.portfolio.dto.response.HoldingResponse;
 import com.tradepulse.portfolio.dto.response.PortfolioResponse;
+import com.tradepulse.portfolio.dto.response.TransactionResponse;
 import com.tradepulse.portfolio.exception.PortfolioAccountNotFoundException;
 import com.tradepulse.portfolio.repository.HoldingRepository;
 import com.tradepulse.portfolio.repository.PortfolioAccountRepository;
@@ -102,19 +103,25 @@ public class PortfolioServiceImpl implements PortfolioService {
         BigDecimal totalValue = account.getCashBalance().add(holdingsValue)
                 .setScale(8, RoundingMode.HALF_UP);
 
+        // Cumulative realized P&L from all SELL fills — single aggregate query
+        BigDecimal totalRealizedPnl = transactionRepository.sumRealizedPnlByUserId(userId);
+
         // Refresh Redis on explicit portfolio fetch (covers stale price reads)
         writeRedisPortfolioValue(userId, totalValue);
 
         return new PortfolioResponse(userId, account.getCashBalance(),
-                holdingsValue, totalValue, totalPnl, responses);
+                holdingsValue, totalValue, totalPnl, totalRealizedPnl, responses);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<Transaction> getHistory(UUID userId, int page, int size) {
+    public PageResponse<TransactionResponse> getHistory(UUID userId, int page, int size) {
         Page<Transaction> result = transactionRepository
                 .findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size));
-        return PageResponse.of(result.getContent(), page, size, result.getTotalElements());
+        List<TransactionResponse> dtos = result.getContent().stream()
+                .map(TransactionResponse::from)
+                .toList();
+        return PageResponse.of(dtos, page, size, result.getTotalElements());
     }
 
     // ─────────────────────────────────────────────────────────────────────────
