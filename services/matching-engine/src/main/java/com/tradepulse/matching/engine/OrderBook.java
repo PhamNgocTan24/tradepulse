@@ -93,7 +93,7 @@ public class OrderBook {
         }
 
         return new MatchingResult(
-                incoming.orderId(), incoming.userId(), symbol,
+                incoming.orderId(), incoming.userId(), symbol, incoming.side(),
                 filled, avgPrice, remaining.compareTo(BigDecimal.ZERO) == 0, fills);
     }
 
@@ -103,6 +103,67 @@ public class OrderBook {
         if (entry == null) return false;
         ("BUY".equals(entry.side()) ? bids : asks).remove(entry);
         return true;
+    }
+
+    /**
+     * Matches resting limit orders against the new market price.
+     * If a bid's limit price >= currentPrice, it is executed.
+     * If an ask's limit price <= currentPrice, it is executed.
+     */
+    public List<MatchingResult> matchAgainstPrice(BigDecimal currentPrice) {
+        List<MatchingResult> results = new ArrayList<>();
+
+        // Process bids: Buy limit orders. Fill if market price <= limit price.
+        while (!bids.isEmpty() && bids.peek().price().compareTo(currentPrice) >= 0) {
+            OrderBookEntry bid = bids.poll();
+            entriesById.remove(bid.orderId());
+
+            MatchingResult result = new MatchingResult(
+                    bid.orderId(),
+                    bid.userId(),
+                    symbol,
+                    bid.side(),
+                    bid.remainingQuantity(),
+                    bid.price(),
+                    true,
+                    List.of(new MatchingResult.FillDetail(
+                            null,
+                            null,
+                            bid.remainingQuantity(),
+                            bid.price()
+                    ))
+            );
+            results.add(result);
+            log.info("Resting BUY limit order matched on price update: orderId={}, limitPrice={}, marketPrice={}",
+                    bid.orderId(), bid.price(), currentPrice);
+        }
+
+        // Process asks: Sell limit orders. Fill if market price >= limit price.
+        while (!asks.isEmpty() && asks.peek().price().compareTo(currentPrice) <= 0) {
+            OrderBookEntry ask = asks.poll();
+            entriesById.remove(ask.orderId());
+
+            MatchingResult result = new MatchingResult(
+                    ask.orderId(),
+                    ask.userId(),
+                    symbol,
+                    ask.side(),
+                    ask.remainingQuantity(),
+                    ask.price(),
+                    true,
+                    List.of(new MatchingResult.FillDetail(
+                            null,
+                            null,
+                            ask.remainingQuantity(),
+                            ask.price()
+                    ))
+            );
+            results.add(result);
+            log.info("Resting SELL limit order matched on price update: orderId={}, limitPrice={}, marketPrice={}",
+                    ask.orderId(), ask.price(), currentPrice);
+        }
+
+        return results;
     }
 
     public int bidCount()  { return bids.size(); }

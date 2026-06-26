@@ -220,7 +220,7 @@ check_prereqs() {
   # Check Docker infra
   log_info "Checking infrastructure containers..."
   local infra_ok=true
-  for container in tradepulse-postgres tradepulse-kafka tradepulse-redis tradepulse-mongo; do
+  for container in tradepulse-postgres tradepulse-kafka tradepulse-redis tradepulse-mongodb; do
     if ! docker ps --format '{{.Names}}' 2>/dev/null | grep -q "^${container}$"; then
       log_warn "Container '$container' is not running."
       infra_ok=false

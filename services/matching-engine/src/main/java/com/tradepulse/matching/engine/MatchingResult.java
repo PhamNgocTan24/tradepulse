@@ -11,6 +11,7 @@ public record MatchingResult(
         UUID orderId,
         UUID userId,
         String symbol,
+        String side,
         BigDecimal filledQuantity,
         BigDecimal averageFillPrice,
         boolean fullyFilled,
