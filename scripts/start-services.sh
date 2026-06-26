@@ -116,30 +116,43 @@ start_service() {
 stop_service() {
   local svc="$1"
   local name; name="$(service_name "$svc")"
+  local port; port="$(service_port "$svc")"
   local pid_f; pid_f="$(pid_file "$svc")"
 
-  if [[ ! -f "$pid_f" ]]; then
-    log_warn "$name — no PID file found."
-    return 0
+  log_info "Stopping $name ..."
+
+  # 1. Kill the Maven process stored in pid file
+  if [[ -f "$pid_f" ]]; then
+    local pid; pid="$(cat "$pid_f")"
+    if kill -0 "$pid" 2>/dev/null; then
+      log_info "Killing Maven process (PID $pid) ..."
+      kill "$pid" 2>/dev/null || true
+    fi
+    rm -f "$pid_f"
   fi
 
-  local pid; pid="$(cat "$pid_f")"
-  if kill -0 "$pid" 2>/dev/null; then
-    log_info "Stopping $name (PID $pid) ..."
-    kill "$pid"
-    local waited=0
-    while kill -0 "$pid" 2>/dev/null && [[ $waited -lt 30 ]]; do
-      sleep 1; ((waited++))
-    done
-    if kill -0 "$pid" 2>/dev/null; then
-      log_warn "$name did not stop gracefully — sending SIGKILL"
-      kill -9 "$pid"
+  # 2. Kill the Java process listening on the port
+  if [[ -n "$port" ]]; then
+    local port_pids; port_pids=$(lsof -t -i :"$port" 2>/dev/null || true)
+    if [[ -n "$port_pids" ]]; then
+      for port_pid in $port_pids; do
+        if kill -0 "$port_pid" 2>/dev/null; then
+          log_info "Killing process on port $port (PID $port_pid) ..."
+          kill "$port_pid" 2>/dev/null || true
+          local waited=0
+          while kill -0 "$port_pid" 2>/dev/null && [[ $waited -lt 6 ]]; do
+            sleep 0.5; waited=$((waited + 1))
+          done
+          if kill -0 "$port_pid" 2>/dev/null; then
+            log_warn "Process $port_pid on port $port did not stop gracefully — sending SIGKILL"
+            kill -9 "$port_pid" 2>/dev/null || true
+          fi
+        fi
+      done
     fi
-    log_ok "$name stopped."
-  else
-    log_warn "$name — PID $pid not running."
   fi
-  rm -f "$pid_f"
+
+  log_ok "$name stopped."
 }
 
 # --------------- Status -------------------------------------------------------
