@@ -12,7 +12,7 @@ This document tracks active development tasks, running services, and fixes appli
 - [x] Configure security & JWKS validation in API Gateway
 - [x] Ingest Binance market data via WebSockets and publish to Kafka
 - [x] Save orders and write to MongoDB audit log in `order-service`
-- [ ] Implement memory-based OrderBook matching in `matching-engine`
+- [x] Implement memory-based OrderBook matching in `matching-engine`
 - [ ] Consume trade events in `portfolio-service` and update holdings
 - [ ] Implement real-time portfolio value updates using Redis prices
 

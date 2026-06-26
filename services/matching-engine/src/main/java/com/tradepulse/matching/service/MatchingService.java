@@ -78,9 +78,17 @@ public class MatchingService {
      * This is a lightweight re-evaluation; the OrderBook.match() handles the logic.
      */
     public void onPriceUpdate(String symbol, BigDecimal newPrice) {
-        // Limit order evaluation is handled implicitly during next NEW_ORDER match.
-        // For proactive evaluation, a separate sweep can be triggered here.
-        log.trace("Price update: symbol={}, price={}", symbol, newPrice);
+        OrderBook book = books.get(symbol);
+        if (book == null) return;
+
+        java.util.List<MatchingResult> results;
+        synchronized (book) {
+            results = book.matchAgainstPrice(newPrice);
+        }
+
+        for (MatchingResult result : results) {
+            resultProducer.publishLimitOrderFill(result);
+        }
     }
 
     public int getBidCount(String symbol) {

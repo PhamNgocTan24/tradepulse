@@ -36,7 +36,7 @@ docker ps
 | Container Name | Service | Port | Credentials |
 |---|---|---|---|
 | `tradepulse-postgres` | PostgreSQL 15 | 5432 | `tradepulse` / `tradepulse` |
-| `tradepulse-mongo` | MongoDB 7 | 27017 | `tradepulse` / `tradepulse` |
+| `tradepulse-mongodb` | MongoDB 7 | 27017 | `tradepulse` / `tradepulse` |
 | `tradepulse-redis` | Redis 7 | 6379 | password: `tradepulse` |
 | `tradepulse-kafka` | Kafka 3.6 | 9092 | — |
 | `tradepulse-zookeeper` | Zookeeper | 2181 | — |
@@ -276,7 +276,7 @@ docker exec tradepulse-redis redis-cli -a tradepulse KEYS "*"
 docker exec tradepulse-redis redis-cli -a tradepulse GET price:BTCUSDT
 
 # Check MongoDB collections
-docker exec tradepulse-mongo mongosh -u tradepulse -p tradepulse --authenticationDatabase admin
+docker exec tradepulse-mongodb mongosh -u tradepulse -p tradepulse --authenticationDatabase admin
 
 # Reset all infrastructure (DESTRUCTIVE)
 cd docker && docker-compose down -v && docker-compose up -d

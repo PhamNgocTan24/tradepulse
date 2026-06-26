@@ -65,4 +65,33 @@ public class OrderResultProducer {
         );
         kafkaTemplate.send("order-events", original.orderId().toString(), cancelledEvent);
     }
+
+    /** Publishes fill events for resting limit orders matched on price updates. */
+    public void publishLimitOrderFill(MatchingResult result) {
+        OrderEventType type = OrderEventType.ORDER_FILLED;
+
+        OrderEvent fillEvent = new OrderEvent(
+                UUID.randomUUID(), type, result.orderId(), result.userId(),
+                result.symbol(), result.side(), "LIMIT",
+                result.filledQuantity(), result.averageFillPrice(),
+                result.filledQuantity(), result.averageFillPrice(), Instant.now()
+        );
+
+        // Notify order-service to update status
+        kafkaTemplate.send("order-events", result.orderId().toString(), fillEvent);
+
+        // Notify portfolio-service to update holdings and balance
+        com.tradepulse.common.dto.kafka.portfolio.PortfolioEventType portfolioType = 
+                com.tradepulse.common.dto.kafka.portfolio.PortfolioEventType.ORDER_FILLED;
+
+        PortfolioEvent portfolioEvent = new PortfolioEvent(
+                UUID.randomUUID(), portfolioType, result.orderId(), result.userId(),
+                result.symbol(), result.side(),
+                result.filledQuantity(), result.averageFillPrice(), Instant.now()
+        );
+        kafkaTemplate.send("portfolio-events", result.userId().toString(), portfolioEvent);
+
+        log.info("Result published for limit order fill: orderId={}, type={}, filled={}, avgPrice={}",
+                result.orderId(), type, result.filledQuantity(), result.averageFillPrice());
+    }
 }
