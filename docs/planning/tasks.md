@@ -13,8 +13,8 @@ This document tracks active development tasks, running services, and fixes appli
 - [x] Ingest Binance market data via WebSockets and publish to Kafka
 - [x] Save orders and write to MongoDB audit log in `order-service`
 - [x] Implement memory-based OrderBook matching in `matching-engine`
-- [ ] Consume trade events in `portfolio-service` and update holdings
-- [ ] Implement real-time portfolio value updates using Redis prices
+- [x] Consume trade events in `portfolio-service` and update holdings
+- [x] Implement real-time portfolio value updates using Redis prices
 
 ---
 

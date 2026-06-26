@@ -25,6 +25,10 @@ public class PortfolioAccount {
     @Id
     private UUID userId;
 
+    /** Optimistic locking — prevents concurrent fills from overwriting cashBalance. */
+    @Version
+    private long version;
+
     /** Available virtual cash. DECIMAL(18,8). Never double/float. */
     @Column(name = "cash_balance", nullable = false, precision = 18, scale = 8)
     @Builder.Default

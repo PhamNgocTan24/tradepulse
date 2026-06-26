@@ -33,21 +33,21 @@ None.
 
 #### 📂 Package: `com.tradepulse.matching.engine`
 
-- **[MODIFY] [MatchingResult.java](file:///Users/newtan/tradepulse/services/matching-engine/src/main/java/com/tradepulse/matching/engine/MatchingResult.java)**:
+- **[MODIFY] [MatchingResult.java](../../services/matching-engine/src/main/java/com/tradepulse/matching/engine/MatchingResult.java)**:
   * Add `String side` field to the record to allow downstream result publishers to know the order side (BUY/SELL) without having the original `OrderEvent`.
 
-- **[MODIFY] [OrderBook.java](file:///Users/newtan/tradepulse/services/matching-engine/src/main/java/com/tradepulse/matching/engine/OrderBook.java)**:
+- **[MODIFY] [OrderBook.java](../../services/matching-engine/src/main/java/com/tradepulse/matching/engine/OrderBook.java)**:
   * Update `match` call to include `incoming.side()` when returning `MatchingResult`.
   * Add a new method `public List<MatchingResult> matchAgainstPrice(BigDecimal currentPrice)` to evaluate resting bids and asks against the new market price and return all executed fills.
 
 #### 📂 Package: `com.tradepulse.matching.service`
 
-- **[MODIFY] [MatchingService.java](file:///Users/newtan/tradepulse/services/matching-engine/src/main/java/com/tradepulse/matching/service/MatchingService.java)**:
+- **[MODIFY] [MatchingService.java](../../services/matching-engine/src/main/java/com/tradepulse/matching/service/MatchingService.java)**:
   * Implement `onPriceUpdate(String symbol, BigDecimal newPrice)`: retrieve the symbol's order book, synchronize on it, invoke `matchAgainstPrice(newPrice)`, and publish the results to Kafka.
 
 #### 📂 Package: `com.tradepulse.matching.event.producer`
 
-- **[MODIFY] [OrderResultProducer.java](file:///Users/newtan/tradepulse/services/matching-engine/src/main/java/com/tradepulse/matching/event/producer/OrderResultProducer.java)**:
+- **[MODIFY] [OrderResultProducer.java](../../services/matching-engine/src/main/java/com/tradepulse/matching/event/producer/OrderResultProducer.java)**:
   * Update `publishResult` call to accommodate the new `side` field in `MatchingResult`.
   * Add a new method `public void publishLimitOrderFill(MatchingResult result)` to publish fills triggered by market price updates.
 
