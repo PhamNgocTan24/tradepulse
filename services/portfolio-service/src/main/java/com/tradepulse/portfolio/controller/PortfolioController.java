@@ -2,8 +2,8 @@ package com.tradepulse.portfolio.controller;
 
 import com.tradepulse.common.dto.response.ApiResponse;
 import com.tradepulse.common.dto.response.PageResponse;
-import com.tradepulse.portfolio.domain.entity.Transaction;
 import com.tradepulse.portfolio.dto.response.PortfolioResponse;
+import com.tradepulse.portfolio.dto.response.TransactionResponse;
 import com.tradepulse.portfolio.service.PortfolioService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ public class PortfolioController {
     }
 
     @GetMapping("/history")
-    public ResponseEntity<ApiResponse<PageResponse<Transaction>>> getHistory(
+    public ResponseEntity<ApiResponse<PageResponse<TransactionResponse>>> getHistory(
             @AuthenticationPrincipal Jwt jwt,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {

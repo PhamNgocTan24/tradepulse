@@ -17,8 +17,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -57,7 +59,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<LeaderboardEntry> getLeaderboard(int topN) {
-        // Primary: Redis sorted set — ZREVRANGE leaderboard 0 (topN-1) WITHSCORES
+        // Step 1: Read ZSet — ZREVRANGE leaderboard 0 (topN-1) WITHSCORES (2 Redis commands total)
         Set<ZSetOperations.TypedTuple<String>> entries =
                 redisTemplate.opsForZSet().reverseRangeWithScores(LEADERBOARD_KEY, 0, topN - 1L);
 
@@ -65,16 +67,32 @@ public class UserServiceImpl implements UserService {
             return List.of();
         }
 
+        // Step 2: Collect all user IDs from the ZSet result
+        Set<UUID> userIds = entries.stream()
+                .filter(e -> e.getValue() != null)
+                .map(e -> UUID.fromString(e.getValue()))
+                .collect(Collectors.toSet());
+
+        // Step 3: Batch load all profiles in a SINGLE DB query (eliminates N+1)
+        Map<UUID, String> displayNames = userProfileRepository.findAllByUserIdIn(userIds)
+                .stream()
+                .collect(Collectors.toMap(
+                        UserProfile::getUserId,
+                        p -> p.getDisplayName() != null ? p.getDisplayName() : p.getEmail()
+                ));
+
+        // Step 4: Build ordered leaderboard entries using the lookup map
         List<LeaderboardEntry> result = new ArrayList<>();
         int rank = 1;
         for (ZSetOperations.TypedTuple<String> entry : entries) {
-            String userId = entry.getValue();
+            String userIdStr = entry.getValue();
+            if (userIdStr == null) continue;
+            UUID userId = UUID.fromString(userIdStr);
             Double score = entry.getScore();
-            String displayName = fetchDisplayName(userId);
             result.add(new LeaderboardEntry(
                     rank++,
-                    UUID.fromString(userId),
-                    displayName,
+                    userId,
+                    displayNames.getOrDefault(userId, userIdStr),  // fallback to ID string if not found
                     score != null ? BigDecimal.valueOf(score) : BigDecimal.ZERO
             ));
         }
@@ -101,12 +119,6 @@ public class UserServiceImpl implements UserService {
     private UserProfile findOrThrow(UUID userId) {
         return userProfileRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(userId));
-    }
-
-    private String fetchDisplayName(String userId) {
-        return userProfileRepository.findById(UUID.fromString(userId))
-                .map(p -> p.getDisplayName() != null ? p.getDisplayName() : p.getEmail())
-                .orElse(userId);
     }
 
     private UserProfileResponse toResponse(UserProfile p) {
