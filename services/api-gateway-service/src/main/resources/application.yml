@@ -104,3 +104,21 @@ logging:
   level:
     com.tradepulse: DEBUG
     org.springframework.cloud.gateway: INFO
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: Auth Service
+        url: /api/auth/v3/api-docs
+      - name: User Service
+        url: /api/users/v3/api-docs
+      - name: Order Service
+        url: /api/orders/v3/api-docs
+      - name: Market Data Service
+        url: /api/market/v3/api-docs
+      - name: Portfolio Service
+        url: /api/portfolio/v3/api-docs
+      - name: Notification Service
+        url: /api/alerts/v3/api-docs
+      - name: Reporting Service
+        url: /api/reports/v3/api-docs

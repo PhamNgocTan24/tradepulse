@@ -72,6 +72,12 @@
             <artifactId>common-security</artifactId>
         </dependency>
 
+        <!-- Swagger / OpenAPI for WebFlux -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webflux-ui</artifactId>
+        </dependency>
+
         <!-- ===== Testing ===== -->
         <!-- WebTestClient for reactive endpoint tests -->
         <dependency>
