@@ -25,6 +25,13 @@ mvn test                               # all services
 mvn test -pl services/order-service -Dtest=OrderServiceTest  # single test class
 ```
 
+### Git Workflow
+```bash
+# Always check out a new branch before writing any code
+git checkout -b feature/your-feature-name    # or task/task-name
+```
+
+
 ---
 
 ## Tech Stack
@@ -240,6 +247,7 @@ market-data-service (websocket/BinanceWebSocketClient.java)
 - ❌ Never skip idempotency checks in Kafka consumers
 - ❌ Never query PostgreSQL for real-time price (use Redis)
 - ❌ Never add database calls in matching-engine hot path
+- ❌ Never write code or make commits directly on the `main` or `master` branch (always check out a task/feature branch first)
 
 ---
 
@@ -251,7 +259,9 @@ market-data-service (websocket/BinanceWebSocketClient.java)
 - [Syntax Guide](docs/development/Syntax.md) — 15 Java bad/good examples
 - [Folder Structure](docs/development/FolderStructure.md) — package and folder conventions
 - [API Contracts](docs/api/ApiContracts.md) — REST contracts, error codes, rate limiting
-- [Task & Roadmap](docs/planning/Task.md) — FR/NFR requirements, implementation roadmap
+- [Backlog](docs/planning/backlog.md) — Product Backlog, User Stories, acceptance criteria
+- [Roadmap](docs/planning/roadmap.md) — milestones, implementation roadmap, tech stack summary
+- [Tasks](docs/planning/tasks.md) — active sprint tasks, local dev status, fixes
 - [Runbook](docs/operations/Runbook.md) — local dev setup, start/stop services, troubleshooting
 
 **Root copies (kept for backward compatibility):**
