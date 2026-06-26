@@ -2,7 +2,7 @@
 
 > For architecture context, see [Architecture.md](../architecture/Architecture.md).
 > For API reference, see [ApiContracts.md](../api/ApiContracts.md).
-> For task tracking, see [Task.md](../planning/Task.md).
+> For task tracking, see [tasks.md](../planning/tasks.md).
 
 ---
 

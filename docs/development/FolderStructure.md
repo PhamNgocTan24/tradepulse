@@ -62,7 +62,9 @@ docs/
 ├── api/
 │   └── ApiContracts.md        # REST contracts, error codes, rate limiting
 ├── planning/
-│   └── Task.md                # FR/NFR requirements + implementation roadmap
+│   ├── backlog.md             # Product Backlog: Functional & Non-Functional requirements
+│   ├── roadmap.md             # Milestones & implementation roadmap
+│   └── tasks.md               # Active developer tasks + running services
 └── operations/
     └── Runbook.md             # Local dev setup, start/stop, logs, troubleshooting
 ```
