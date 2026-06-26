@@ -34,10 +34,10 @@ declare -a SERVICES=(
   "user-service:User Service:8082"
   "order-service:Order Service:8083"
   "market-data-service:Market Data:8084"
-  "matching-engine:Matching Engine:8085"
-  "portfolio-service:Portfolio Service:8086"
-  "notification-service:Notification:8087"
-  "reporting-service:Reporting:8088"
+  "portfolio-service:Portfolio Service:8085"
+  "notification-service:Notification:8086"
+  "reporting-service:Reporting:8087"
+  "matching-engine:Matching Engine:8090"
 )
 
 # --------------- Helpers ------------------------------------------------------

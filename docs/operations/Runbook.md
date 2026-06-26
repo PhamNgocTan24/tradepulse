@@ -108,21 +108,24 @@ mvn spring-boot:run -pl services/api-gateway-service
 | Service | Port | Maven Module | Health Endpoint |
 |---|---|---|---|
 | api-gateway-service | 8080 | `services/api-gateway-service` | `GET :8080/actuator/health` |
-| auth-service | 8081 | `services/auth-service` | `GET :8081/actuator/health` |
-| user-service | 8082 | `services/user-service` | `GET :8082/actuator/health` |
-| market-data-service | 8083 | `services/market-data-service` | `GET :8083/actuator/health` |
-| order-service | 8084 | `services/order-service` | `GET :8084/actuator/health` |
-| portfolio-service | 8085 | `services/portfolio-service` | `GET :8085/actuator/health` |
-| matching-engine | 8086 | `services/matching-engine` | `GET :8086/actuator/health` |
-| notification-service | 8087 | `services/notification-service` | `GET :8087/actuator/health` |
-| reporting-service | 8088 | `services/reporting-service` | `GET :8088/actuator/health` |
+| auth-service | 8081 | `services/auth-service` | `GET :8081/api/auth/actuator/health` |
+| user-service | 8082 | `services/user-service` | `GET :8082/api/users/actuator/health` |
+| order-service | 8083 | `services/order-service` | `GET :8083/api/orders/actuator/health` |
+| market-data-service | 8084 | `services/market-data-service` | `GET :8084/api/market/actuator/health` |
+| portfolio-service | 8085 | `services/portfolio-service` | `GET :8085/api/portfolio/actuator/health` |
+| notification-service | 8086 | `services/notification-service` | `GET :8086/api/actuator/health` |
+| reporting-service | 8087 | `services/reporting-service` | `GET :8087/api/reports/actuator/health` |
+| matching-engine | 8090 | `services/matching-engine` | `GET :8090/actuator/health` |
 
 ### Quick Health Check (all services)
 
 ```bash
-for port in 8080 8081 8082 8083 8084 8085 8086 8087 8088; do
-  echo -n "Port $port: "
-  curl -s "http://localhost:$port/actuator/health" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status','?'))" 2>/dev/null || echo "UNREACHABLE"
+for service in "8080:/actuator/health" "8081:/api/auth/actuator/health" "8082:/api/users/actuator/health" "8083:/api/orders/actuator/health" "8084:/api/market/actuator/health" "8085:/api/portfolio/actuator/health" "8086:/api/actuator/health" "8087:/api/reports/actuator/health" "8090:/actuator/health"; do
+  port="${service%%:*}"
+  path="${service#*:}"
+  echo -n "Port $port ($path): "
+  svc_status=$(curl -s "http://localhost:$port$path" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('status','?'))" 2>/dev/null || echo "UNREACHABLE")
+  echo "$svc_status"
 done
 ```
 
