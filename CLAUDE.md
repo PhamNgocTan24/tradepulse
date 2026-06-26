@@ -29,6 +29,12 @@ mvn test -pl services/order-service -Dtest=OrderServiceTest  # single test class
 ```bash
 # Always check out a new branch before writing any code
 git checkout -b feature/your-feature-name    # or task/task-name
+
+# Push local branch to origin
+git push origin your-branch-name
+
+# Create a Pull Request via GitHub CLI
+gh pr create --title "type: short description" --body "Detailed changes summary"
 ```
 
 
