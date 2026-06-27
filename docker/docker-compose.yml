@@ -168,7 +168,6 @@ services:
         condition: service_healthy
     entrypoint: ["/bin/sh", "-c"]
     command: |
-      "
       echo 'Waiting for Kafka to be ready...'
       sleep 5
 
@@ -201,7 +200,6 @@ services:
 
       echo 'Topics created successfully:'
       kafka-topics --bootstrap-server kafka:29092 --list
-      "
     networks:
       - tradepulse-net
     restart: "no"
