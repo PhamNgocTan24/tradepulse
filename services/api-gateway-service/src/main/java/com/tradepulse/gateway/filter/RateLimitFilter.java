@@ -40,13 +40,18 @@ public class RateLimitFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        // Retrieve the security principal from the reactive exchange context
         return exchange.getPrincipal()
+                // Verify if the request is authenticated with a JWT token
                 .filter(p -> p instanceof JwtAuthenticationToken)
                 .cast(JwtAuthenticationToken.class)
                 .map(JwtAuthenticationToken::getToken)
+                // Extract the user ID (subject claim) from the verified JWT
                 .map(Jwt::getSubject)
+                // Execute the Redis token-bucket rate limiter asynchronously
                 .flatMap(userId -> checkRateLimit(exchange, chain, userId))
-                .switchIfEmpty(chain.filter(exchange)); // anonymous requests pass through
+                // Fallback: anonymous requests (e.g., login, register) bypass user-based rate limiting
+                .switchIfEmpty(chain.filter(exchange));
     }
 
     private Mono<Void> checkRateLimit(ServerWebExchange exchange,
@@ -54,22 +59,27 @@ public class RateLimitFilter implements GlobalFilter, Ordered {
                                        String userId) {
         String key = SecurityConstants.REDIS_KEY_RATE_LIMIT + userId;
 
+        // Atomically increment the request count in Redis (non-blocking)
         return redisTemplate.opsForValue()
                 .increment(key)
                 .flatMap(count -> {
                     if (count == 1) {
-                        // First request in window — set TTL
+                        // First request inside the current 60-second window: initialize key expiration TTL
                         return redisTemplate.expire(key, Duration.ofSeconds(60))
                                 .thenReturn(count);
                     }
                     return Mono.just(count);
                 })
                 .flatMap(count -> {
+                    // Check if the current request count exceeds the maximum limit configured
                     if (count > requestsPerMinute) {
                         log.warn("Rate limit exceeded for userId={}, count={}", userId, count);
+                        // Deny the request with HTTP 429 Too Many Requests status code
                         exchange.getResponse().setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
+                        // Stop processing the request immediately and complete the response
                         return exchange.getResponse().setComplete();
                     }
+                    // Request is within limits, proceed downstream
                     return chain.filter(exchange);
                 });
     }
