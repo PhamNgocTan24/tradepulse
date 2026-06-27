@@ -28,6 +28,7 @@ server:
   port: 8084
   servlet:
     context-path: /api/market
+  forward-headers-strategy: framework
 
 management:
   endpoints:

@@ -167,39 +167,40 @@ services:
       kafka:
         condition: service_healthy
     entrypoint: ["/bin/sh", "-c"]
-    command: |
-      echo 'Waiting for Kafka to be ready...'
-      sleep 5
+    command:
+      - |
+        echo 'Waiting for Kafka to be ready...'
+        sleep 5
 
-      echo 'Creating topics...'
+        echo 'Creating topics...'
 
-      # market-data: 10 partitions (partitioned by symbol)
-      kafka-topics --bootstrap-server kafka:29092 \
-        --create --if-not-exists --topic market-data \
-        --partitions 10 --replication-factor 1
+        # market-data: 10 partitions (partitioned by symbol)
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists --topic market-data \
+          --partitions 10 --replication-factor 1
 
-      # order-events: 5 partitions (partitioned by order_id)
-      kafka-topics --bootstrap-server kafka:29092 \
-        --create --if-not-exists --topic order-events \
-        --partitions 5 --replication-factor 1
+        # order-events: 5 partitions (partitioned by order_id)
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists --topic order-events \
+          --partitions 5 --replication-factor 1
 
-      # portfolio-events: 5 partitions (partitioned by user_id)
-      kafka-topics --bootstrap-server kafka:29092 \
-        --create --if-not-exists --topic portfolio-events \
-        --partitions 5 --replication-factor 1
+        # portfolio-events: 5 partitions (partitioned by user_id)
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists --topic portfolio-events \
+          --partitions 5 --replication-factor 1
 
-      # notifications: 3 partitions (partitioned by user_id)
-      kafka-topics --bootstrap-server kafka:29092 \
-        --create --if-not-exists --topic notifications \
-        --partitions 3 --replication-factor 1
+        # notifications: 3 partitions (partitioned by user_id)
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists --topic notifications \
+          --partitions 3 --replication-factor 1
 
-      # user-events: 3 partitions
-      kafka-topics --bootstrap-server kafka:29092 \
-        --create --if-not-exists --topic user-events \
-        --partitions 3 --replication-factor 1
+        # user-events: 3 partitions
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists --topic user-events \
+          --partitions 3 --replication-factor 1
 
-      echo 'Topics created successfully:'
-      kafka-topics --bootstrap-server kafka:29092 --list
+        echo 'Topics created successfully:'
+        kafka-topics --bootstrap-server kafka:29092 --list
     networks:
       - tradepulse-net
     restart: "no"

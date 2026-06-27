@@ -44,6 +44,7 @@ server:
   port: 8082
   servlet:
     context-path: /api/users
+  forward-headers-strategy: framework
 
 management:
   endpoints:
