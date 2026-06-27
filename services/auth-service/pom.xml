@@ -73,6 +73,10 @@
             <groupId>com.eatthepath</groupId>
             <artifactId>java-otp</artifactId>
         </dependency>
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
 
         <!-- ===== QR Code generation for TOTP setup screen ===== -->
         <dependency>

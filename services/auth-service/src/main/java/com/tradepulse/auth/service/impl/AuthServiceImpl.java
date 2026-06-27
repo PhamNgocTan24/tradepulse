@@ -103,7 +103,15 @@ public class AuthServiceImpl implements AuthService {
     public TotpSetupResponse setupTotp(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AuthException("User not found", org.springframework.http.HttpStatus.NOT_FOUND));
-        return totpService.generateSetup(user.getEmail());
+        
+        TotpService.TotpGenerateResult result = totpService.generateSetup(user.getEmail());
+        String encryptedSecret = totpService.encrypt(result.secretBase32());
+        
+        user.setTotpSecret(encryptedSecret);
+        userRepository.save(user);
+        
+        log.info("Temporary TOTP secret generated and saved for userId={}", userId);
+        return result.setupResponse();
     }
 
     @Override

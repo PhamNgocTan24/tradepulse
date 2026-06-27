@@ -102,8 +102,14 @@ resilience4j:
 
 logging:
   level:
-    com.tradepulse: DEBUG
-    org.springframework.cloud.gateway: INFO
+    com.tradepulse: INFO
+    org.springframework.cloud.gateway: WARN
+    org.springframework.cloud.gateway.route: INFO
+    org.springframework.http.server.reactive: WARN
+    reactor.netty.http.server: WARN
+    reactor.netty.http.client: WARN
+    org.springframework.cloud.gateway.filter.headers.observation: WARN
+    org.springframework.security.web.server: WARN
 
 springdoc:
   swagger-ui:

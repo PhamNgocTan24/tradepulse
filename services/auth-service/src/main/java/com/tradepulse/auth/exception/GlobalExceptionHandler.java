@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -37,6 +38,19 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(), "Validation Failed",
                 "Request validation failed", req.getRequestURI(), fieldErrors);
         return ResponseEntity.badRequest().body(body);
+    }
+
+    /**
+     * Handles malformed JSON bodies (e.g. trailing comma, missing quotes, unexpected token).
+     * JsonParseException is wrapped inside HttpMessageNotReadableException by Spring.
+     */
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleMalformedJson(HttpMessageNotReadableException ex,
+                                                              HttpServletRequest req) {
+        log.warn("Malformed request body on {}: {}", req.getRequestURI(), ex.getMessage());
+        return ResponseEntity.badRequest()
+                .body(ErrorResponse.of(400, "Bad Request",
+                        "Request body is malformed or contains invalid JSON", req.getRequestURI()));
     }
 
     @ExceptionHandler(Exception.class)

@@ -10,6 +10,7 @@ import com.tradepulse.auth.service.JwtService;
 import com.tradepulse.common.dto.response.ApiResponse;
 import com.tradepulse.security.constants.SecurityConstants;
 import com.tradepulse.security.jwt.JwtClaims;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -55,7 +56,7 @@ public class AuthController {
 
     @GetMapping("/totp/setup")
     public ResponseEntity<ApiResponse<TotpSetupResponse>> setupTotp(
-            @RequestHeader(SecurityConstants.AUTH_HEADER) String authHeader) {
+            @Parameter(hidden = true) @RequestHeader(SecurityConstants.AUTH_HEADER) String authHeader) {
         JwtClaims claims = jwtService.parseAndValidate(
                 authHeader.replace(SecurityConstants.BEARER_PREFIX, ""));
         return ResponseEntity.ok(ApiResponse.ok(authService.setupTotp(claims.userId())));
@@ -63,7 +64,7 @@ public class AuthController {
 
     @PostMapping("/totp/confirm")
     public ResponseEntity<Void> confirmTotp(
-            @RequestHeader(SecurityConstants.AUTH_HEADER) String authHeader,
+            @Parameter(hidden = true) @RequestHeader(SecurityConstants.AUTH_HEADER) String authHeader,
             @RequestParam String code) {
         JwtClaims claims = jwtService.parseAndValidate(
                 authHeader.replace(SecurityConstants.BEARER_PREFIX, ""));
