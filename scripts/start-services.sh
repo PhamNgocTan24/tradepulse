@@ -261,7 +261,7 @@ main() {
     case "$1" in
       --stop)    mode="stop";   shift ;;
       --status)  mode="status"; shift ;;
-      --logs)    mode="logs";   shift; args+=("${1:-}"); shift ;;
+      --logs|--log) mode="logs";   shift; args+=("${1:-}"); shift ;;
       --help|-h)
         echo "Usage: $0 [--stop|--status|--logs <svc>] [service...]"
         exit 0 ;;

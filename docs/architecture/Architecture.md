@@ -1,6 +1,6 @@
 # TradePulse — Architecture
 
-> **Quick links:** [Patterns](../development/Patterns.md) · [Syntax](../development/Syntax.md) · [API Contracts](../api/ApiContracts.md) · [Runbook](../operations/Runbook.md) · [Backlog](../planning/backlog.md) · [Roadmap](../planning/roadmap.md) · [Tasks](../planning/tasks.md)
+> **Quick links:** [Mermaid Diagrams](diagrams/README.md) · [Patterns](../development/Patterns.md) · [Syntax](../development/Syntax.md) · [API Contracts](../api/ApiContracts.md) · [Runbook](../operations/Runbook.md) · [Backlog](../planning/backlog.md) · [Roadmap](../planning/roadmap.md) · [Tasks](../planning/tasks.md)
 
 ---
 
