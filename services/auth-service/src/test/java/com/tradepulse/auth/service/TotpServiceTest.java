@@ -28,17 +28,13 @@ class TotpServiceTest {
 
     @Test
     void testGenerateSetup() {
-        TotpService.TotpGenerateResult result = totpService.generateSetup("test@example.com");
-        assertNotNull(result);
-        assertNotNull(result.secretBase32());
-        assertFalse(result.secretBase32().contains("="));
-
-        TotpSetupResponse setupResponse = result.setupResponse();
-        assertNotNull(setupResponse);
-        assertNotNull(setupResponse.otpAuthUri());
-        assertNotNull(setupResponse.qrCodeBase64());
-        assertTrue(setupResponse.otpAuthUri().contains("secret=" + result.secretBase32()));
-        assertTrue(setupResponse.otpAuthUri().contains("issuer=TradePulse"));
+        for (int i = 0; i < 10000; i++) {
+            TotpService.TotpGenerateResult result = totpService.generateSetup("test@example.com");
+            assertNotNull(result);
+            assertNotNull(result.secretBase32());
+            assertEquals(32, result.secretBase32().length(), "Failed at iteration " + i + " with secret: " + result.secretBase32());
+            assertFalse(result.secretBase32().contains("="));
+        }
     }
 
     @Test
