@@ -75,3 +75,6 @@ logging:
   level:
     com.tradepulse: DEBUG
     org.springframework.security: INFO
+
+totp:
+  encryption-key: ${TOTP_ENCRYPTION_KEY:my-super-secret-key-32-bytes-long!}
