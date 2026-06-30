@@ -1,5 +1,13 @@
-<!-- BEGIN:nextjs-agent-rules -->
-# This is NOT the Next.js you know
+# Frontend Agent Instructions (Next.js & React)
 
-This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
-<!-- END:nextjs-agent-rules -->
+This file contains rules for agent behavior when working in the `frontend` folder of the TradePulse project.
+
+## Standard Guidelines
+- **Modern Web APIs:** Always follow the latest Next.js 14+ practices (App Router, Server Components).
+- **TypeScript:** Strict types only. Absolutely no `any`.
+- **Comments Language:** All code comments MUST be written in **English**.
+- **Separation of Types:** Never declare `interface` or `type` definitions directly in logic files. Extract them into the `src/types/` directory.
+
+## References
+For detailed guidelines on project structure, data fetching patterns, styling rules, and how TypeScript concepts map to Java, refer to:
+- [Next.js Coding Best Practices](docs/nextjs-best-practices.md)
