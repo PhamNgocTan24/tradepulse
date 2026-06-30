@@ -21,7 +21,7 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null); // Stores submission error messages
 
   // Handles form submission event
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault(); // Prevent default browser reload on form submit
     setLoading(true);
     setError(null);
