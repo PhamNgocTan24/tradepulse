@@ -261,6 +261,8 @@ market-data-service (websocket/BinanceWebSocketClient.java)
 
 **Structured docs (`docs/`):**
 - [Architecture](docs/architecture/Architecture.md) — system design, service catalogue, Kafka flows, DB schema, security
+- [Next.js Best Practices](frontend/docs/nextjs-best-practices.md) — Frontend coding rules, types management, and BFF auth patterns
+- [Frontend Agents Guide](frontend/AGENTS.md) — Rules and instructions for AI agents working in the frontend
 - [Design Patterns](docs/development/Patterns.md) — 15 distributed-systems patterns
 - [Syntax Guide](docs/development/Syntax.md) — 15 Java bad/good examples
 - [Folder Structure](docs/development/FolderStructure.md) — package and folder conventions
