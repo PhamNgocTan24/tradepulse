@@ -34,3 +34,18 @@ export interface RegisterResponse {
   email: string;
 }
 
+export interface BackendFieldError {
+  field: string;
+  message: string;
+}
+
+export interface BackendErrorResponse {
+  status: number;
+  error: string;
+  message: string;
+  path: string;
+  timestamp: string;
+  fieldErrors?: BackendFieldError[];
+}
+
+

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { LoginRequestBody, AuthResponse, ApiResponse } from "@/types/auth";
+import { LoginRequestBody, AuthResponse, ApiResponse, BackendErrorResponse } from "@/types/auth";
 
 export async function POST(request: Request) {
   try {
@@ -22,18 +22,35 @@ export async function POST(request: Request) {
       }),
     });
 
-    // Parse the response as ApiResponse wrapping AuthResponse
-    const result = (await response.json()) as ApiResponse<AuthResponse>;
+    // Parse the response
+    const result = await response.json();
 
     // Handle authentication failures returned from backend
-    if (!result.success || !result.data) {
+    if (!response.ok) {
+      const errorResponse = result as BackendErrorResponse;
+      let errorMessage = "Invalid credentials.";
+      if (errorResponse.fieldErrors && errorResponse.fieldErrors.length > 0) {
+        errorMessage = errorResponse.fieldErrors
+          .map((f) => `${f.field}: ${f.message}`)
+          .join(", ");
+      } else if (errorResponse.message) {
+        errorMessage = errorResponse.message;
+      }
       return NextResponse.json(
-        { error: result.message || "Invalid credentials." },
+        { error: errorMessage },
         { status: response.status }
       );
     }
 
-    const { accessToken, refreshToken, accessTokenExpiresIn } = result.data;
+    const apiResponse = result as ApiResponse<AuthResponse>;
+    if (!apiResponse.data) {
+      return NextResponse.json(
+        { error: "Invalid credentials." },
+        { status: 400 }
+      );
+    }
+
+    const { accessToken, refreshToken, accessTokenExpiresIn } = apiResponse.data;
     const cookieStore = await cookies();
 
     // Store Access Token in an HttpOnly cookie (valid for 15 minutes)
