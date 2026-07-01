@@ -163,3 +163,4 @@ scripts/*.tmp
 *.pid.lock
 .cache/
 .gradle/
+.aws/

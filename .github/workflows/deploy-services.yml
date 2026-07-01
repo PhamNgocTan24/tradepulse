@@ -1,0 +1,53 @@
+name: Deploy Services
+
+on:
+  push:
+    branches:
+      - main
+      - devops/*
+    paths:
+      - 'services/api-gateway-service/**'
+      - 'services/auth-service/**'
+      - '.github/workflows/deploy-ecs-template.yml'
+      - '.github/workflows/deploy-services.yml'
+
+jobs:
+  detect-changes:
+    name: Detect Changed Services
+    runs-on: ubuntu-latest
+    outputs:
+      api-gateway: ${{ steps.filter.outputs.api-gateway }}
+      auth-service: ${{ steps.filter.outputs.auth-service }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check path changes
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            api-gateway:
+              - 'services/api-gateway-service/**'
+            auth-service:
+              - 'services/auth-service/**'
+
+  deploy-api-gateway:
+    name: Deploy API Gateway
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.api-gateway == 'true' || github.event_name == 'workflow_dispatch' }}
+    uses: ./.github/workflows/deploy-ecs-template.yml
+    with:
+      service_name: 'api-gateway-service'
+      ecr_repository: 'tradepulse-api-gateway'
+      container_name: 'api-gateway-app'
+
+  deploy-auth-service:
+    name: Deploy Auth Service
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.auth-service == 'true' || github.event_name == 'workflow_dispatch' }}
+    uses: ./.github/workflows/deploy-ecs-template.yml
+    with:
+      service_name: 'auth-service'
+      ecr_repository: 'tradepulse-auth-service'
+      container_name: 'auth-service-app'
