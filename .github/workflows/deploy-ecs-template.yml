@@ -66,6 +66,16 @@ jobs:
           docker push $ECR_REGISTRY/${{ inputs.ecr_repository }}:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/${{ inputs.ecr_repository }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+      - name: Get AWS Account ID
+        id: get-account
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          echo "account_id=$ACCOUNT_ID" >> $GITHUB_OUTPUT
+
+      - name: Inject AWS Account ID into Task Definition template
+        run: |
+          sed -i "s/<AWS_ACCOUNT_ID>/${{ steps.get-account.outputs.account_id }}/g" .aws/${{ inputs.service_name }}-task-def.json
+
       - name: Fill in the new image ID in the Amazon ECS task definition
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
