@@ -34,6 +34,8 @@ public class GlobalExceptionHandler {
                 .map(f -> new ErrorResponse.FieldError(f.getField(), f.getDefaultMessage()))
                 .toList();
 
+        log.warn("Validation failed on {}: {}", req.getRequestURI(), fieldErrors);
+
         ErrorResponse body = ErrorResponse.withFieldErrors(
                 HttpStatus.BAD_REQUEST.value(), "Validation Failed",
                 "Request validation failed", req.getRequestURI(), fieldErrors);

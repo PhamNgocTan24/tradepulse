@@ -3,7 +3,7 @@
 This file contains rules for agent behavior when working in the `frontend` folder of the TradePulse project.
 
 ## Standard Guidelines
-- **Modern Web APIs:** Always follow the latest Next.js 14+ practices (App Router, Server Components).
+- **Modern Web APIs:** Always follow the latest Next.js practices (App Router, Server Components, and Next.js 16+ features like `proxy.ts` replacing `middleware.ts`). Always cross-reference with official Next.js documentation for newest routing and API standards.
 - **TypeScript:** Strict types only. Absolutely no `any`.
 - **Comments Language:** All code comments MUST be written in **English**.
 - **Separation of Types:** Never declare `interface` or `type` definitions directly in logic files. Extract them into the `src/types/` directory.

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { RegisterRequestBody, RegisterResponse, ApiResponse } from "@/types/auth";
+import { RegisterRequestBody, RegisterResponse, ApiResponse, BackendErrorResponse } from "@/types/auth";
 
 export async function POST(request: Request) {
   try {
@@ -21,18 +21,28 @@ export async function POST(request: Request) {
       }),
     });
 
-    // Parse the response as ApiResponse wrapping RegisterResponse
-    const result = (await response.json()) as ApiResponse<RegisterResponse>;
+    // Parse the response
+    const result = await response.json();
 
     // Handle registration failures returned from backend
-    if (!result.success || !result.data) {
+    if (!response.ok) {
+      const errorResponse = result as BackendErrorResponse;
+      let errorMessage = "Registration failed.";
+      if (errorResponse.fieldErrors && errorResponse.fieldErrors.length > 0) {
+        errorMessage = errorResponse.fieldErrors
+          .map((f) => `${f.field}: ${f.message}`)
+          .join(", ");
+      } else if (errorResponse.message) {
+        errorMessage = errorResponse.message;
+      }
       return NextResponse.json(
-        { error: result.message || "Registration failed." },
+        { error: errorMessage },
         { status: response.status }
       );
     }
 
-    return NextResponse.json({ success: true, data: result.data });
+    const apiResponse = result as ApiResponse<RegisterResponse>;
+    return NextResponse.json({ success: true, data: apiResponse.data });
   } catch (error) {
     console.error("Register route handler error:", error);
     return NextResponse.json(
