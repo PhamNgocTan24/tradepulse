@@ -1,15 +1,19 @@
 name: Deploy Services
 
+permissions:
+  id-token: write
+  contents: read
+
 on:
   push:
     branches:
       - main
-      - devops/*
     paths:
       - 'services/api-gateway-service/**'
       - 'services/auth-service/**'
       - '.github/workflows/deploy-ecs-template.yml'
       - '.github/workflows/deploy-services.yml'
+  workflow_dispatch:
 
 jobs:
   detect-changes:
