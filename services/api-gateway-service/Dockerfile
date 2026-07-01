@@ -1,15 +1,8 @@
-# Stage 1: Build
-FROM maven:3.9.6-eclipse-temurin-21 AS builder
-WORKDIR /build
-COPY pom.xml .
-COPY shared ./shared
-COPY services/api-gateway-service ./services/api-gateway-service
-RUN mvn clean package -pl services/api-gateway-service -am -DskipTests
-
-# Stage 2: Extract Layers (Optimize caching for Spring Boot 3.2)
+# Stage 1: Extract Layers (Optimize caching for Spring Boot 3.2)
 FROM eclipse-temurin:21-jre-alpine AS extractor
 WORKDIR /app
-COPY --from=builder /build/services/api-gateway-service/target/*.jar app.jar
+ARG JAR_FILE=services/api-gateway-service/target/*.jar
+COPY ${JAR_FILE} app.jar
 RUN java -Djarmode=layertools -jar app.jar extract
 
 # Stage 3: Runtime

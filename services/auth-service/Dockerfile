@@ -10,7 +10,7 @@ FROM gcr.io/distroless/java21-debian12:nonroot
 WORKDIR /app
 
 # JAR_FILE will be injected during the docker build phase from the Maven target directory
-ARG JAR_FILE=target/*.jar
+ARG JAR_FILE=services/auth-service/target/*.jar
 COPY ${JAR_FILE} app.jar
 
 # JVM options tailored for container environments:
