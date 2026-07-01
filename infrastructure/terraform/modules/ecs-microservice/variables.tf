@@ -80,3 +80,8 @@ variable "jwt_secret_arn" {
   description = "Secrets Manager ARN for JWT keypair"
   type        = string
 }
+
+variable "kms_key_arn" {
+  description = "ARN of the KMS key used for encrypting secrets"
+  type        = string
+}
