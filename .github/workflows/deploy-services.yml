@@ -51,7 +51,7 @@ jobs:
       service_name: 'api-gateway-service'
       ecs_service_name: 'tradepulse-api-gateway'
       ecr_repository: 'tradepulse-api-gateway'
-      container_name: 'api-gateway-app'
+      container_name: 'tradepulse-api-gateway-app'
 
   deploy-auth-service:
     name: Deploy Auth Service
@@ -62,4 +62,4 @@ jobs:
       service_name: 'auth-service'
       ecs_service_name: 'tradepulse-auth-service'
       ecr_repository: 'tradepulse-auth-service'
-      container_name: 'auth-service-app'
+      container_name: 'tradepulse-auth-service-app'
