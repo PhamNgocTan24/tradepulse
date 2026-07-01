@@ -292,5 +292,7 @@ cd docker && docker-compose down -v && docker-compose up -d
 If you encounter `ExpiredToken` or `No valid credential sources found` when running `terraform apply`, export your AWS credentials dynamically using this one-liner (requires `jq`):
 
 ```bash
+unset AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN
+
 eval $(aws configure export-credentials | jq -r '"export AWS_ACCESS_KEY_ID=\(.AccessKeyId)\nexport AWS_SECRET_ACCESS_KEY=\(.SecretAccessKey)\nexport AWS_SESSION_TOKEN=\(.SessionToken)"')
 ```

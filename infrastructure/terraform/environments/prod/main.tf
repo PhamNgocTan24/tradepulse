@@ -55,4 +55,5 @@ module "ecs_services" {
   # Secrets ARNs
   db_password_secret_arn = aws_secretsmanager_secret.db_password.arn
   jwt_secret_arn         = aws_secretsmanager_secret.jwt_keys.arn
+  kms_key_arn            = aws_kms_key.kms.arn
 }

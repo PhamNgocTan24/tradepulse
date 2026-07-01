@@ -18,6 +18,11 @@ resource "aws_service_discovery_service" "discovery" {
   }
 }
 
+resource "aws_cloudwatch_log_group" "ecs" {
+  name              = "/ecs/${var.service_name}"
+  retention_in_days = 7
+}
+
 # IAM Role for ECS Agent (Execution Role) to pull images and fetch Secrets
 resource "aws_iam_role" "ecs_execution_role" {
   name = "${var.service_name}-execution-role"
@@ -45,16 +50,27 @@ resource "aws_iam_policy" "secrets_policy" {
 
   policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect = "Allow"
-      Action = [
-        "secretsmanager:GetSecretValue"
-      ]
-      Resource = [
-        var.db_password_secret_arn,
-        var.jwt_secret_arn
-      ]
-    }]
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "secretsmanager:GetSecretValue"
+        ]
+        Resource = [
+          var.db_password_secret_arn,
+          var.jwt_secret_arn
+        ]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "kms:Decrypt"
+        ]
+        Resource = [
+          var.kms_key_arn
+        ]
+      }
+    ]
   })
 }
 
