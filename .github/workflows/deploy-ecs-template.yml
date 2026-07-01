@@ -39,6 +39,9 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
+      - name: Build with Maven
+        run: mvn clean package -pl services/${{ inputs.service_name }} -am -DskipTests
+
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -55,7 +58,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/${{ inputs.ecr_repository }}:$IMAGE_TAG -f services/${{ inputs.service_name }}/Dockerfile .
+          docker build --build-arg JAR_FILE=services/${{ inputs.service_name }}/target/*.jar -t $ECR_REGISTRY/${{ inputs.ecr_repository }}:$IMAGE_TAG -f services/${{ inputs.service_name }}/Dockerfile .
           docker push $ECR_REGISTRY/${{ inputs.ecr_repository }}:$IMAGE_TAG
           echo "image=$ECR_REGISTRY/${{ inputs.ecr_repository }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
